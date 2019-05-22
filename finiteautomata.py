@@ -5,4 +5,8 @@ class finite_automata:
         self.transitions = transistions
         self.init_state = init_state
         self.final_states = final_states
-    
+
+input_file = open("myfile.txt", "r")
+def file_to_automata(input_file):
+
+
