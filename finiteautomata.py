@@ -1,8 +1,8 @@
 class finite_automata:
-    def __init__(self, states = 0, alphabets = [], transistions = {}, init_state = 'q0', final_states = set()):
+    def __init__(self, states = 0, alphabets = [], transitions = {}, init_state = 'q0', final_states = set()):
         self.states = states
         self.alphabets = alphabets
-        self.transitions = transistions
+        self.transitions = transitions
         self.init_state = init_state
         self.final_states = final_states
     '''def __str__(self):
@@ -111,3 +111,24 @@ def find_equal_states(automata, automata_states = []):
     return automata_states
 
 dfa = nfa_to_dfa(t)
+
+
+def write_automata_to_file(automata, file_path):
+        f=open(file_path,'w')
+        f.write(str(automata.states)+"\n")
+        for alphabet in automata.alphabets[:-1]:
+            f.write(alphabet+",")
+        f.write(automata.alphabets[-1]+"\n")
+        f.write("->")
+        for state in automata.transitions:
+            source_state = state
+            if state in automata.final_states:
+                source_state = "*"+source_state
+            for dist_set in automata.transitions[state]:
+                if dist_set[1] in automata.final_states:
+                    dist_state = "*"+dist_set[1]
+                else:
+                    dist_state = dist_set[1]
+                f.write(source_state+","+dist_set[0]+","+dist_state+"\n")
+        f.close()
+write_automata_to_file(dfa, "b.txt")
