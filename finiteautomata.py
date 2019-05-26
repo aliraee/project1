@@ -1,6 +1,5 @@
-from pprint import pprint
 class finite_automata:
-    def __init__(self, states = 0, alphabets = set(), transistions = {}, init_state = 'q0', final_states = set()):
+    def __init__(self, states = 0, alphabets = [], transistions = {}, init_state = 'q0', final_states = set()):
         self.states = states
         self.alphabets = alphabets
         self.transitions = transistions
@@ -12,7 +11,7 @@ class finite_automata:
 
 def assign_data(file_path):
     s=''
-    f=open(path,'r')
+    f=open(file_path,'r')
     for line in f:
         s+=line
     s=s.split('\n')
@@ -21,7 +20,7 @@ def assign_data(file_path):
     nfa=finite_automata()
     
     states=lines[0]
-    alphabets=set(lines[1].split(','))
+    alphabets= lines[1].split(',')
     
     init_transitions=[]
     init_state=lines[2].split(',')[0][2:]
@@ -73,3 +72,42 @@ s=s.split('\n')
 print(s)'''
 #t=assign_data(path)
 #print(t)
+t = assign_data("D:\\uni\\Theory_of_langueges_and_machines\\a.txt")
+
+def nfa_to_dfa(nfa):
+    dfa = finite_automata(alphabets = nfa.alphabets)
+    dfa_states = [ find_equal_states(nfa ,[nfa.init_state])]
+    dfa.transitions["q0"] = []
+    for states in dfa_states:
+        
+        next_states = {}
+        for alphabet in nfa.alphabets:
+            next_states[alphabet] = []
+        for state in states:
+            for transition in nfa.transitions[state]:
+                
+                if transition[0] != "_" and transition[1] not in next_states[transition[0]]:
+                    next_states[transition[0]].append(transition[1])
+        for next_state_list in next_states.values():
+            next_state_list = find_equal_states(nfa, next_state_list)
+            if next_state_list not in (dfa_states):
+                dfa_states.append(next_state_list)
+                for final_state in nfa.final_states:
+                    if final_state in next_state_list:
+                        dfa.final_states.add('q'+ str(dfa_states.index(next_state_list)))
+                dfa.transitions['q'+ str(dfa_states.index(next_state_list))] = []
+
+        for alphabet in next_states:
+            dfa.transitions['q'+str(dfa_states.index(states))].append((alphabet,'q' + str(dfa_states.index(next_states[alphabet]))))
+    dfa.states = len(dfa_states)
+    return dfa
+                    
+def find_equal_states(automata, automata_states = []):
+    for state in automata_states:
+        for transition in automata.transitions[state]:
+                if (transition[0] == "_" ):
+                    automata_states.append(transition[1])
+    automata_states.sort()
+    return automata_states
+
+dfa = nfa_to_dfa(t)
