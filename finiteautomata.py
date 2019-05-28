@@ -188,4 +188,4 @@ for element in most_delete:
                 new_list.append(x)
         dfa.transitions[el]=new_list
 
-print(dfa.transitions)
+#print(dfa.transitions)
