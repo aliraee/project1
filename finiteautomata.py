@@ -1,9 +1,9 @@
-from pprint import pprint
 class finite_automata:
-    def __init__(self, states = 0, alphabets = [], transistions = {}, init_state = 'q0', final_states = set()):
+
+    def __init__(self, states = 0, alphabets = [], transitions = {}, init_state = 'q0', final_states = set()):
         self.states = states
         self.alphabets = alphabets
-        self.transitions = transistions
+        self.transitions = transitions
         self.init_state = init_state
         self.final_states = final_states
     '''def __str__(self):
@@ -68,6 +68,16 @@ def make_transitions(lst):
 
 t = assign_data('C:\\Users\\Asus\\Desktop\\code\\TheoryOfLanguagesAndMachines\\a.txt')
 
+#f=open(path,'r')
+'''s=''
+for line in f:
+    s+=line
+s=s.split('\n')
+print(s)'''
+#t=assign_data(path)
+#print(t)
+#t = assign_data("D:\\uni\\Theory_of_langueges_and_machines\\a.txt")
+
 def nfa_to_dfa(nfa):
     dfa = finite_automata(alphabets = nfa.alphabets)
     dfa_states = [ find_equal_states(nfa ,[nfa.init_state])]
@@ -105,14 +115,36 @@ def find_equal_states(automata, automata_states = []):
     return automata_states
 
 dfa = nfa_to_dfa(t)
-#pprint(dfa.transitions)
-t=nfa_to_dfa(t)
+
+def write_automata_to_file(automata, file_path):
+        f=open(file_path,'w')
+        f.write(str(automata.states)+"\n")
+        for alphabet in automata.alphabets[:-1]:
+            f.write(alphabet+",")
+        f.write(automata.alphabets[-1]+"\n")
+        f.write("->")
+        for state in automata.transitions:
+            source_state = state
+            if state in automata.final_states:
+                source_state = "*"+source_state
+            for dist_set in automata.transitions[state]:
+                if dist_set[1] in automata.final_states:
+                    dist_state = "*"+dist_set[1]
+                else:
+                    dist_state = dist_set[1]
+                f.write(source_state+","+dist_set[0]+","+dist_state+"\n")
+        f.close()
+write_automata_to_file(dfa, "b.txt")
+
+
+
+
 #pprint(t.transitions)
-states=list(t.transitions.keys())
+states=list(dfa.transitions.keys())
 table=[]
-final_state=list(t.final_states)
+final_state=list(dfa.final_states)
 #final_state.sort()
-final_states=t.final_states
+final_states=dfa.final_states
 for i in range(len(states)-1):
     for j in range(i+1,len(states)):
         #print(st[i],',',st[j])
@@ -124,13 +156,13 @@ for i in range(len(table)):
 for x in table:
     if x[2]=='':
         
-        for alpha in t.alphabets:
+        for alpha in dfa.alphabets:
             temp=[]
-            for i in t.transitions[x[0]]:
+            for i in dfa.transitions[x[0]]:
                 if i[0]==alpha:
                     temp.append(i[1])
                     break
-            for i in t.transitions[x[1]]:
+            for i in dfa.transitions[x[1]]:
                 if i[0]==alpha:
                     temp.append(i[1])
                     break
@@ -146,13 +178,14 @@ for i in table:
 #print(most_delete)
 #element
 for element in most_delete:
-    t.transitions.pop(element[1],None)
-    for el in t.transitions.keys():
+    dfa.transitions.pop(element[1],None)
+    for el in dfa.transitions.keys():
         new_list=[]
-        for x in t.transitions[el]:
+        for x in dfa.transitions[el]:
             if element[1] in x:
                 new_list.append((x[0],element[0]))
             else:
                 new_list.append(x)
-        t.transitions[el]=new_list
+        dfa.transitions[el]=new_list
 
+print(dfa.transitions)
