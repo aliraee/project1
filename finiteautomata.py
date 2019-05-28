@@ -1,6 +1,6 @@
 from pprint import pprint
 class finite_automata:
-    def __init__(self, states = 0, alphabets = set(), transistions = {}, init_state = 'q0', final_states = set()):
+    def __init__(self, states = 0, alphabets = [], transistions = {}, init_state = 'q0', final_states = set()):
         self.states = states
         self.alphabets = alphabets
         self.transitions = transistions
@@ -12,7 +12,7 @@ class finite_automata:
 
 def assign_data(file_path):
     s=''
-    f=open(path,'r')
+    f=open(file_path,'r')
     for line in f:
         s+=line
     s=s.split('\n')
@@ -21,7 +21,7 @@ def assign_data(file_path):
     nfa=finite_automata()
     
     states=lines[0]
-    alphabets=set(lines[1].split(','))
+    alphabets= lines[1].split(',')
     
     init_transitions=[]
     init_state=lines[2].split(',')[0][2:]
@@ -65,11 +65,94 @@ def make_transitions(lst):
     return result
 #test
 #path='C:\\Users\\Asus\\Desktop\\code\\TheoryOfLanguagesAndMachines\\a.txt'
-#f=open(path,'r')
-'''s=''
-for line in f:
-    s+=line
-s=s.split('\n')
-print(s)'''
-#t=assign_data(path)
-#print(t)
+
+t = assign_data('C:\\Users\\Asus\\Desktop\\code\\TheoryOfLanguagesAndMachines\\a.txt')
+
+def nfa_to_dfa(nfa):
+    dfa = finite_automata(alphabets = nfa.alphabets)
+    dfa_states = [ find_equal_states(nfa ,[nfa.init_state])]
+    dfa.transitions["q0"] = []
+    for states in dfa_states:
+        
+        next_states = {}
+        for alphabet in nfa.alphabets:
+            next_states[alphabet] = []
+        for state in states:
+            for transition in nfa.transitions[state]:
+                
+                if transition[0] != "_" and transition[1] not in next_states[transition[0]]:
+                    next_states[transition[0]].append(transition[1])
+        for next_state_list in next_states.values():
+            next_state_list = find_equal_states(nfa, next_state_list)
+            if next_state_list not in (dfa_states):
+                dfa_states.append(next_state_list)
+                for final_state in nfa.final_states:
+                    if final_state in next_state_list:
+                        dfa.final_states.add('q'+ str(dfa_states.index(next_state_list)))
+                dfa.transitions['q'+ str(dfa_states.index(next_state_list))] = []
+
+        for alphabet in next_states:
+            dfa.transitions['q'+str(dfa_states.index(states))].append((alphabet,'q' + str(dfa_states.index(next_states[alphabet]))))
+    dfa.states = len(dfa_states)
+    return dfa
+                    
+def find_equal_states(automata, automata_states = []):
+    for state in automata_states:
+        for transition in automata.transitions[state]:
+                if (transition[0] == "_" ):
+                    automata_states.append(transition[1])
+    automata_states.sort()
+    return automata_states
+
+dfa = nfa_to_dfa(t)
+#pprint(dfa.transitions)
+t=nfa_to_dfa(t)
+#pprint(t.transitions)
+states=list(t.transitions.keys())
+table=[]
+final_state=list(t.final_states)
+#final_state.sort()
+final_states=t.final_states
+for i in range(len(states)-1):
+    for j in range(i+1,len(states)):
+        #print(st[i],',',st[j])
+        table.append([states[i],states[j],''])
+for i in range(len(table)):
+    if (table[i][0] in final_state and table[i][1] not in final_state) or(table[i][0] not in final_state and table[i][1]  in final_state):
+        table[i][2]=1
+#print(table)
+for x in table:
+    if x[2]=='':
+        
+        for alpha in t.alphabets:
+            temp=[]
+            for i in t.transitions[x[0]]:
+                if i[0]==alpha:
+                    temp.append(i[1])
+                    break
+            for i in t.transitions[x[1]]:
+                if i[0]==alpha:
+                    temp.append(i[1])
+                    break
+            temp.sort()
+            for element in table:
+                if element[0]==temp[0] and element[1]==temp[1] and element[2]==1:
+                    x[2]=1
+                    break
+most_delete=[]
+for i in table:
+    if i[2]=='':
+        most_delete.append(i[:-1])
+#print(most_delete)
+#element
+for element in most_delete:
+    t.transitions.pop(element[1],None)
+    for el in t.transitions.keys():
+        new_list=[]
+        for x in t.transitions[el]:
+            if element[1] in x:
+                new_list.append((x[0],element[0]))
+            else:
+                new_list.append(x)
+        t.transitions[el]=new_list
+
