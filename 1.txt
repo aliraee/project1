@@ -1,0 +1,33 @@
+var total_packerts=[0,0];
+var total_rate=[0.0,0.0];
+var first_packet_time=[0,0];
+var last_packet_time=[0,0];
+var time_out_msg='';
+TIMEOUT(3600000,log.log(time_out_msg));
+while(true){
+
+    var send_or_rec=-1;
+    if(msg.startswitch("DATA recv")){
+        send_or_rec=1;
+    }else if(msg.startswitch("DATA send")){
+        send_or_rec=0;
+    }else{
+        try{
+            YIELD();
+            continue;
+        }catch(e){
+            time_out_msg="\n-------finish proccessing--------\n"+"send packets: "+total_packerts[0]+"recv packets: "+total_packerts[1]+"\nend time: "+time;
+            throw("script killed:)");
+        }
+
+    }
+    total_packerts[send_or_rec]++;
+    if(first_packet_time[send_or_rec]==0){
+        first_packet_time[send_or_rec]=time/1000000;
+    }
+    last_packet_time[send_or_rec]=time/1000000;
+    fasele=last_packet_time[send_or_rec]-first_packet_time[send_or_rec];
+    total_rate[send_or_rec]=total_packerts[send_or_rec]/fasele;
+
+    log.log("------------\n"+(send_or_rec ==1 "recv" : "send")+"stat\n zamane residan: "+fasele+" rate: "+total_rate[send_or_rec]+" total packer count: "+total_packerts);
+}
